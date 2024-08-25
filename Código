@@ -1,0 +1,86 @@
+import tkinter as tk
+from tkinter import messagebox
+from fpdf import FPDF
+from datetime import datetime
+
+class PDF(FPDF):
+    def header(self):
+        self.set_font('Arial', 'B', 12)
+        self.cell(0, 10, 'RECIBO', 0, 1, 'C')
+        self.ln(10)
+
+    def footer(self):
+        self.set_y(-15)
+        self.set_font('Arial', 'I', 8)
+        self.cell(0, 10, f'Pagina {self.page_no()}', 0, 0, 'C')
+
+def gerar_recibo_pdf(nome_cliente, descricao_servico, valor, numero_recibo):
+    pdf = PDF()
+    pdf.add_page()
+
+    pdf.set_font('Arial', '', 12)
+
+    data_atual = datetime.now().strftime("%d/%m/%Y")
+
+    # Cabeçalho
+    pdf.cell(0, 10, f'Recibo Nº {numero_recibo}', 0, 1, 'C')
+    pdf.ln(10)
+
+    # Corpo do recibo
+    pdf.cell(0, 10, f'Data: {data_atual}', 0, 1)
+    pdf.ln(10)
+    pdf.cell(0, 10, f'Recebemos de: {nome_cliente}', 0, 1)
+    pdf.ln(5)
+    pdf.cell(0, 10, f'A quantia de: R$ {valor:.2f}', 0, 1)
+    pdf.ln(5)
+    pdf.cell(0, 10, f'Referente a: {descricao_servico}', 0, 1)
+    pdf.ln(20)
+
+    # Rodapé com a assinatura
+    pdf.cell(0, 10, 'Assinatura: ___________________________', 0, 1)
+
+    # Salvando o PDF
+    pdf_filename = f'recibo_{numero_recibo}.pdf'
+    pdf.output(pdf_filename)
+
+    return pdf_filename
+
+def gerar_recibo():
+    nome_cliente = entry_nome.get()
+    descricao_servico = entry_descricao.get()
+    valor = float(entry_valor.get())
+    numero_recibo = int(entry_numero.get())
+
+    if nome_cliente and descricao_servico and valor and numero_recibo:
+        pdf_filename = gerar_recibo_pdf(nome_cliente, descricao_servico, valor, numero_recibo)
+        messagebox.showinfo("Sucesso", f"Recibo gerado com sucesso: {pdf_filename}")
+    else:
+        messagebox.showerror("Erro", "Todos os campos são obrigatórios!")
+
+# Configuração da janela principal
+root = tk.Tk()
+root.title("Gerador de Recibos")
+
+# Labels e Entrys
+tk.Label(root, text="Nome do Cliente:").grid(row=0, column=0, padx=10, pady=10)
+entry_nome = tk.Entry(root, width=30)
+entry_nome.grid(row=0, column=1, padx=10, pady=10)
+
+tk.Label(root, text="Descrição do Serviço:").grid(row=1, column=0, padx=10, pady=10)
+entry_descricao = tk.Entry(root, width=30)
+entry_descricao.grid(row=1, column=1, padx=10, pady=10)
+
+tk.Label(root, text="Valor (R$):").grid(row=2, column=0, padx=10, pady=10)
+entry_valor = tk.Entry(root, width=30)
+entry_valor.grid(row=2, column=1, padx=10, pady=10)
+
+tk.Label(root, text="Número do Recibo:").grid(row=3, column=0, padx=10, pady=10)
+entry_numero = tk.Entry(root, width=30)
+entry_numero.grid(row=3, column=1, padx=10, pady=10)
+
+# Botão de gerar recibo
+btn_gerar = tk.Button(root, text="Gerar Recibo", command=gerar_recibo)
+btn_gerar.grid(row=4, column=0, columnspan=2, pady=20)
+
+# Inicia a aplicação
+root.mainloop()
